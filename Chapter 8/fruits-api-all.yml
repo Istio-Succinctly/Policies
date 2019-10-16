@@ -1,0 +1,75 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: micro-shake-factory
+  labels:
+    istio-injection: enabled
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fruits-api-deployment-v1
+  namespace: micro-shake-factory
+spec:
+  selector:
+    matchLabels:
+      app: fruits-api
+  replicas: 2
+  minReadySeconds: 1
+  progressDeadlineSeconds: 600
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+  template:
+    metadata:
+      labels:
+        app: fruits-api
+        version: "1"
+    spec:
+      containers:
+        - name: fruits-api
+          image: istiosuccinctly/fruits-api:1.0.0
+          imagePullPolicy: IfNotPresent
+          resources:
+            limits:
+              cpu: 1000m
+              memory: 1024Mi
+            requests:
+              cpu: 100m
+              memory: 100Mi
+          ports:
+            - name: http-fruits-api
+              containerPort: 3000
+          env:
+            - name: app_version
+              value: "1"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fruits-api-service
+  namespace: micro-shake-factory
+spec:
+  selector:
+    app: fruits-api
+  ports:
+    - name: http-fruits-api-service
+      port: 80
+      targetPort: http-fruits-api
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: fruits-api-vservice
+  namespace: micro-shake-factory
+spec:
+  hosts:
+    - fruits.istio-succinctly.io
+  http:
+    - route:
+        - destination:
+            host: fruits-api-service
+            port:
+              number: 80

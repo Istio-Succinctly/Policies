@@ -1,0 +1,94 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: micro-shake-factory
+  labels:
+    istio-injection: enabled
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: juice-shop-api-deployment
+  namespace: micro-shake-factory
+spec:
+  selector:
+    matchLabels:
+      app: juice-shop-api
+  replicas: 2
+  minReadySeconds: 1
+  progressDeadlineSeconds: 600
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+  template:
+    metadata:
+      labels:
+        app: juice-shop-api
+    spec:
+      containers:
+        - name: juice-shop-api
+          image: istiosuccinctly/juice-shop-api:1.0.0
+          imagePullPolicy: IfNotPresent
+          resources:
+            limits:
+              cpu: 1000m
+              memory: 1024Mi
+            requests:
+              cpu: 100m
+              memory: 100Mi
+          ports:
+            - name: http-js-api
+              containerPort: 3001
+          env:
+            - name: FRUITS_API
+              value: "http://fruits-api-service.micro-shake-factory.svc.cluster.local"
+            - name: EXOTIC_FRUITS_API
+              value: "https://raw.githubusercontent.com/Istio-Succinctly/ExoticFruits/master/fruits.json"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: juice-shop-api-service
+  namespace: micro-shake-factory
+spec:
+  selector:
+    app: juice-shop-api
+  ports:
+    - name: http-js-api-service
+      port: 80
+      targetPort: http-js-api
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: juice-shop-api-gateway
+  namespace: micro-shake-factory
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - port:
+        number: 80
+        name: http-juice-shop-api-gateway
+        protocol: HTTP
+      hosts:
+        - juice-shop.istio-succinctly.io
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: juice-shop-api-vservice
+  namespace: micro-shake-factory
+spec:
+  hosts:
+    - juice-shop.istio-succinctly.io
+  gateways:
+    - juice-shop-api-gateway
+  http:
+    - route:
+        - destination:
+            host: juice-shop-api-service
+            port:
+              number: 80

@@ -1,0 +1,13 @@
+apiVersion: authentication.istio.io/v1alpha1
+kind: Policy
+metadata:
+  name: fruits-api-authn-policy
+  namespace: micro-shake-factory
+spec:
+  targets:
+    - name: fruits-api-service
+  origins:
+    - jwt:
+        issuer: "istio-succinctly.io"
+        jwksUri: "https://raw.githubusercontent.com/Istio-Succinctly/Policies/master/Static/jwks.json"
+  principalBinding: USE_ORIGIN

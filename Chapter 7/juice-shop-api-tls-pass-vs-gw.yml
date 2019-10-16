@@ -1,0 +1,38 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: juice-shop-api-gateway
+  namespace: micro-shake-factory
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - port:
+        number: 443
+        name: https-juice-shop-api-gateway
+        protocol: HTTPS
+      tls:
+        mode: PASSTHROUGH
+      hosts:
+        - juice-shop.istio-succinctly.io
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: juice-shop-api-vservice
+  namespace: micro-shake-factory
+spec:
+  hosts:
+    - juice-shop.istio-succinctly.io
+  gateways:
+    - juice-shop-api-gateway
+  tls:
+    - match:
+        - port: 443
+          sniHosts:
+            - juice-shop.istio-succinctly.io
+      route:
+        - destination:
+            host: juice-shop-api-service
+            port:
+              number: 443
