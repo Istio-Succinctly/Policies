@@ -1,6 +1,8 @@
 # Policies
 
-> Companion repo for the title **Istio Succinctly** by Syncfusion
+> Companion repo for the title [**Istio Succinctly**](https://www.syncfusion.com/ebooks/istio-succinctly) by Syncfusion.
+
+[![cover](images/Banner.jpg)](https://www.syncfusion.com/ebooks/istio-succinctly)
 
 This repo contains the Istio YAML specifications used in the title- Istio Succinctly.
 
