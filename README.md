@@ -8,9 +8,7 @@ This repo contains the Istio YAML specifications used in the title- Istio Succin
 
 ## Istio Succinctly
 
-Download Istio Succinctly for free from Syncfusion.
-
-> Placeholder for image
+Download [**Istio Succinctly**](https://www.syncfusion.com/ebooks/istio-succinctly) for free from Syncfusion.
 
 ## How to use this repo
 
